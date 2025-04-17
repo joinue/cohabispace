@@ -367,33 +367,15 @@ body {
 
 .footer-content {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   max-width: 1200px;
   margin: 0 auto;
-  flex-wrap: wrap;
-  gap: 1rem;
 }
 
 .footer-content p {
   color: var(--text-light);
   font-size: 0.875rem;
-}
-
-.footer-links {
-  display: flex;
-  gap: 1.5rem;
-}
-
-.footer-links a {
-  color: var(--text-light);
-  text-decoration: none;
-  font-size: 0.875rem;
-  transition: var(--transition);
-}
-
-.footer-links a:hover {
-  color: var(--primary-color);
 }
 
 /* Animations */
@@ -463,15 +445,6 @@ body {
 
   .section-title {
     font-size: 1.75rem;
-  }
-  
-  .footer-content {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .footer-links {
-    justify-content: center;
   }
 }
 

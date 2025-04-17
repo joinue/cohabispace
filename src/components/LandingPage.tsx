@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaSignInAlt, FaUserPlus, FaArrowRight } from 'react-icons/fa';
+import { FaArrowRight, FaBrain, FaHandshake, FaChartLine } from 'react-icons/fa';
 import './LandingPage.css';
 
 const LandingPage: React.FC = () => {
@@ -44,29 +44,29 @@ const LandingPage: React.FC = () => {
           <div className="features-grid">
             <div className="feature-card">
               <div className="feature-icon">
-                <FaSignInAlt />
+                <FaBrain />
               </div>
-              <h3 className="feature-title">Create Your Account</h3>
+              <h3 className="feature-title">Visualize Mental Load</h3>
               <p className="feature-description">
-                Sign up and create your profile to get started with Cohabitask.
+                See the distribution of household tasks and mental load between partners at a glance.
               </p>
             </div>
             <div className="feature-card">
               <div className="feature-icon">
-                <FaUserPlus />
+                <FaHandshake />
               </div>
-              <h3 className="feature-title">Add Your Partner</h3>
+              <h3 className="feature-title">Fair Distribution</h3>
               <p className="feature-description">
-                Invite your partner to join and start balancing household tasks together.
+                Use our algorithm to suggest a balanced distribution of tasks based on difficulty and frequency.
               </p>
             </div>
             <div className="feature-card">
               <div className="feature-icon">
-                <FaArrowRight />
+                <FaChartLine />
               </div>
-              <h3 className="feature-title">Track & Balance</h3>
+              <h3 className="feature-title">Track Progress</h3>
               <p className="feature-description">
-                Visualize and fairly distribute household responsibilities between partners.
+                Monitor changes over time and see how your household balance improves.
               </p>
             </div>
           </div>
