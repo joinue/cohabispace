@@ -231,6 +231,33 @@ Small things we noticed and skipped. Pull from this list between bigger pieces.
 - **Soft-delete / undo.** Deletes are immediate. A 5-second "Undo" toast on delete actions is a
   small polish that significantly reduces accidental loss.
 
+## Engineering rigor & followups
+
+These aren't product features — they're things about _how we build_ that didn't get done in
+Phase 1–2 and should be addressed before the codebase grows much further.
+
+- **CI.** No GitHub Actions yet. A simple workflow that runs `npm run check && npm run build`
+  on every push and PR would have caught at least one bug we shipped this session. Add before
+  Phase 3.
+- **Tests.** Vitest and Playwright are in the stack list but never configured. Highest-leverage
+  starting point: a Playwright smoke test covering the golden path (sign up → confirm email
+  via Supabase mailer → create household → add task → complete it → see it under
+  `/completed`). Even one test would catch most regressions.
+- **Real-device QA.** Built mobile-first; never opened on an actual phone. The sidebar drawer,
+  picker popovers, soft-keyboard behavior on iOS Safari specifically need a manual pass before
+  Phase 6 (App Store) and arguably before Phase 4 (PWA).
+- **Root-cause the RLS / JWT propagation issue.** All Server Action writes go through the
+  service-role client because `@supabase/ssr` v0.7 + Next 16 sometimes failed to forward the
+  user's JWT to PostgREST, causing spurious "row violates RLS" errors. The workaround is
+  defensible (action code is the authz layer) but the root cause is still a hypothesis. Revisit
+  when `@supabase/ssr` 0.8 ships or Next 16 stabilizes the cookies pipeline; if it's gone, we
+  can move some writes back to the user-scoped client and let RLS enforce them.
+- **Error reporting.** No Sentry / Logtail / OpenTelemetry. Errors only surface in Vercel logs
+  and the Next dev overlay. Real users will hit issues we can't reproduce; we need a wire.
+  Pre-Phase-6 minimum.
+- **Performance budget.** No tracking. Worth a Lighthouse pass once Phase 4 (PWA) lands,
+  before Capacitor wraps it.
+
 ## Migrations
 
 Applied in order (oldest to newest):
