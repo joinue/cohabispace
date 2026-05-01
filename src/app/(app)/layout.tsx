@@ -6,20 +6,26 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 import { requireUser } from "@/lib/dal";
 import { HouseholdSwitcher } from "@/features/households/components/household-switcher";
-import { getActiveHousehold, getMyHouseholds } from "@/features/households/queries";
+import {
+  getActiveHousehold,
+  getHouseholdMembers,
+  getMyHouseholds,
+} from "@/features/households/queries";
 import { getActiveSpaces } from "@/features/spaces/queries";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
   const [households, active] = await Promise.all([getMyHouseholds(), getActiveHousehold()]);
-  const spaces = active ? await getActiveSpaces(active.id) : [];
+  const [spaces, members] = active
+    ? await Promise.all([getActiveSpaces(active.id), getHouseholdMembers(active.id)])
+    : [[], []];
 
   const displayName =
     typeof user.user_metadata?.display_name === "string" ? user.user_metadata.display_name : null;
 
   return (
     <AppShell
-      sidebar={<AppSidebar spaces={spaces} />}
+      sidebar={<AppSidebar spaces={spaces} members={members} />}
       topBarLeft={
         <>
           <Link href="/dashboard" className="flex items-center gap-2">

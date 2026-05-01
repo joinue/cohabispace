@@ -2,17 +2,33 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CheckSquareIcon, FolderIcon, SettingsIcon } from "lucide-react";
+import { CheckCheckIcon, CheckSquareIcon, FolderIcon, SettingsIcon } from "lucide-react";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { SpaceMark } from "@/features/spaces/components/space-mark";
+import type { HouseholdMember } from "@/features/households/queries";
 import type { SpaceRow } from "@/features/spaces/queries";
+
+function initials(name: string | null, email: string): string {
+  const source = (name?.trim() || email).trim();
+  if (!source) return "?";
+  return source
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .filter(Boolean)
+    .join("")
+    .toUpperCase();
+}
 
 export function AppSidebar({
   spaces,
+  members,
   onNavigate,
 }: {
   spaces: SpaceRow[];
+  members: HouseholdMember[];
   /** Called when a nav item is activated — used to close the mobile drawer. */
   onNavigate?: () => void;
 }) {
@@ -28,6 +44,14 @@ export function AppSidebar({
           icon={<CheckSquareIcon className="size-4" aria-hidden="true" />}
         >
           All tasks
+        </SidebarLink>
+        <SidebarLink
+          href="/completed"
+          active={pathname.startsWith("/completed")}
+          onNavigate={onNavigate}
+          icon={<CheckCheckIcon className="size-4" aria-hidden="true" />}
+        >
+          Completed
         </SidebarLink>
       </div>
 
@@ -50,6 +74,32 @@ export function AppSidebar({
           ))
         )}
       </SidebarSection>
+
+      {members.length > 1 ? (
+        <SidebarSection label="People">
+          {members.map((m) => (
+            <SidebarLink
+              key={m.userId}
+              href={`/people/${m.userId}`}
+              active={pathname === `/people/${m.userId}`}
+              onNavigate={onNavigate}
+              icon={
+                <Avatar size="sm" className="size-5">
+                  {m.avatarUrl ? (
+                    <AvatarImage src={m.avatarUrl} alt="" />
+                  ) : (
+                    <AvatarFallback className="text-[10px]">
+                      {initials(m.displayName, m.email)}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+              }
+            >
+              {m.displayName ?? m.email.split("@")[0]}
+            </SidebarLink>
+          ))}
+        </SidebarSection>
+      ) : null}
 
       <div className="mt-auto flex flex-col gap-0.5">
         <SidebarLink
@@ -91,7 +141,7 @@ function SidebarLink({
 }) {
   return (
     <Link
-      // biome-ignore: typedRoutes catches typos at build time; this prop is dynamic.
+      // typedRoutes can't infer dynamic segments at runtime
       href={href as never}
       onClick={onNavigate}
       className={cn(

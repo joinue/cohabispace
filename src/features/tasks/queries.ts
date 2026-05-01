@@ -37,7 +37,11 @@ const TASK_SELECT =
 export const getPendingTasks = cache(
   async (
     householdId: string,
-    options: { spaceId?: string | null; tag?: string | null } = {},
+    options: {
+      spaceId?: string | null;
+      tag?: string | null;
+      assigneeId?: string | null;
+    } = {},
   ): Promise<TaskWithRelations[]> => {
     await requireUser();
     const supabase = await createSupabaseServerClient();
@@ -53,6 +57,13 @@ export const getPendingTasks = cache(
       query = query.is("space_id", null);
     } else if (options.spaceId !== undefined) {
       query = query.eq("space_id", options.spaceId);
+    }
+
+    if (options.assigneeId !== undefined) {
+      query =
+        options.assigneeId === null
+          ? query.is("assigned_to", null)
+          : query.eq("assigned_to", options.assigneeId);
     }
 
     if (options.tag) {
