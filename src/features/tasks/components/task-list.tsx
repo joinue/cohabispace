@@ -1,14 +1,21 @@
 import { TaskRow } from "@/features/tasks/components/task-row";
 import { DUE_GROUP_ORDER, type DueGroup, groupTasksByDue } from "@/features/tasks/utils";
 import type { HouseholdMember } from "@/features/households/queries";
-import type { TaskWithAssignee } from "@/features/tasks/queries";
+import type { SpaceRow } from "@/features/spaces/queries";
+import type { TaskWithRelations } from "@/features/tasks/queries";
 
 export function TaskList({
   tasks,
   members,
+  spaces,
+  showSpacePill = true,
+  emptyMessage = "No tasks yet. Add one above to get started.",
 }: {
-  tasks: TaskWithAssignee[];
+  tasks: TaskWithRelations[];
   members: HouseholdMember[];
+  spaces: SpaceRow[];
+  showSpacePill?: boolean;
+  emptyMessage?: string;
 }) {
   const groups = groupTasksByDue(tasks);
   const visible = DUE_GROUP_ORDER.filter((g) => groups[g.key].length > 0);
@@ -16,7 +23,7 @@ export function TaskList({
   if (visible.length === 0) {
     return (
       <div className="border-border bg-muted/20 text-muted-foreground rounded-xl border border-dashed px-4 py-10 text-center text-sm">
-        No tasks yet. Add one above to get started.
+        {emptyMessage}
       </div>
     );
   }
@@ -30,6 +37,8 @@ export function TaskList({
           label={group.label}
           tasks={groups[group.key]}
           members={members}
+          spaces={spaces}
+          showSpacePill={showSpacePill}
         />
       ))}
     </div>
@@ -41,11 +50,15 @@ function Section({
   label,
   tasks,
   members,
+  spaces,
+  showSpacePill,
 }: {
   groupKey: DueGroup;
   label: string;
-  tasks: TaskWithAssignee[];
+  tasks: TaskWithRelations[];
   members: HouseholdMember[];
+  spaces: SpaceRow[];
+  showSpacePill: boolean;
 }) {
   return (
     <section className="flex flex-col gap-1.5">
@@ -63,7 +76,13 @@ function Section({
       </header>
       <ul className="flex flex-col">
         {tasks.map((t) => (
-          <TaskRow key={t.id} task={t} members={members} />
+          <TaskRow
+            key={t.id}
+            task={t}
+            members={members}
+            spaces={spaces}
+            showSpacePill={showSpacePill}
+          />
         ))}
       </ul>
     </section>

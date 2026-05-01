@@ -8,6 +8,15 @@ export type Json = string | number | boolean | null | { [k: string]: Json | unde
 export type HouseholdRole = "owner" | "admin" | "adult" | "teen" | "child" | "guest";
 export type InvitationStatus = "pending" | "accepted" | "revoked" | "expired";
 export type TaskStatus = "pending" | "completed" | "skipped";
+export type SpaceColor =
+  | "slate"
+  | "red"
+  | "orange"
+  | "amber"
+  | "emerald"
+  | "blue"
+  | "violet"
+  | "rose";
 
 export interface Database {
   public: {
@@ -111,6 +120,7 @@ export interface Database {
           rrule: string | null;
           tags: string[];
           position: number | null;
+          space_id: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -130,10 +140,39 @@ export interface Database {
           rrule?: string | null;
           tags?: string[];
           position?: number | null;
+          space_id?: string | null;
           created_at?: string;
           updated_at?: string;
         };
         Update: Partial<Database["public"]["Tables"]["tasks"]["Insert"]>;
+        Relationships: [];
+      };
+      spaces: {
+        Row: {
+          id: string;
+          household_id: string;
+          name: string;
+          icon: string | null;
+          color: SpaceColor;
+          position: number | null;
+          archived_at: string | null;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          name: string;
+          icon?: string | null;
+          color?: SpaceColor;
+          position?: number | null;
+          archived_at?: string | null;
+          created_by: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["spaces"]["Insert"]>;
         Relationships: [];
       };
     };
@@ -141,6 +180,7 @@ export interface Database {
     Functions: {
       is_household_member: { Args: { hid: string }; Returns: boolean };
       is_household_admin: { Args: { hid: string }; Returns: boolean };
+      is_household_adult: { Args: { hid: string }; Returns: boolean };
     };
     Enums: {
       household_role: HouseholdRole;

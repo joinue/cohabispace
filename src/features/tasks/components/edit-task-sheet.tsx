@@ -21,18 +21,22 @@ import { FormFieldError } from "@/features/auth/components/form-field-error";
 import { deleteTaskAction, updateTaskAction } from "@/features/tasks/actions";
 import { AssigneePickerChip } from "@/features/tasks/components/assignee-picker-chip";
 import { DatePickerChip } from "@/features/tasks/components/date-picker-chip";
+import { SpacePickerChip } from "@/features/spaces/components/space-picker-chip";
 import type { HouseholdMember } from "@/features/households/queries";
+import type { SpaceRow } from "@/features/spaces/queries";
 import type { FormState } from "@/lib/forms";
-import type { TaskWithAssignee } from "@/features/tasks/queries";
+import type { TaskWithRelations } from "@/features/tasks/queries";
 
 export function EditTaskSheet({
   task,
   members,
+  spaces,
   open,
   onOpenChange,
 }: {
-  task: TaskWithAssignee;
+  task: TaskWithRelations;
   members: HouseholdMember[];
+  spaces: SpaceRow[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -44,6 +48,7 @@ export function EditTaskSheet({
           key={open ? `${task.id}-${task.updated_at}` : "closed"}
           task={task}
           members={members}
+          spaces={spaces}
           onClose={() => onOpenChange(false)}
         />
       </SheetContent>
@@ -54,14 +59,17 @@ export function EditTaskSheet({
 function EditTaskFormBody({
   task,
   members,
+  spaces,
   onClose,
 }: {
-  task: TaskWithAssignee;
+  task: TaskWithRelations;
   members: HouseholdMember[];
+  spaces: SpaceRow[];
   onClose: () => void;
 }) {
   const [date, setDate] = useState<Date | null>(task.due_at ? new Date(task.due_at) : null);
   const [assignee, setAssignee] = useState<string | null>(task.assigned_to);
+  const [spaceId, setSpaceId] = useState<string | null>(task.space_id);
   const [deletePending, startDelete] = useTransition();
 
   const wrappedAction = async (prev: FormState, formData: FormData): Promise<FormState> => {
@@ -95,6 +103,7 @@ function EditTaskFormBody({
       >
         <input type="hidden" name="dueAt" value={date ? date.toISOString() : ""} />
         <input type="hidden" name="assignedTo" value={assignee ?? ""} />
+        <input type="hidden" name="spaceId" value={spaceId ?? ""} />
 
         {state?.error ? (
           <Alert variant="destructive">
@@ -142,6 +151,13 @@ function EditTaskFormBody({
           <Label>Assigned to</Label>
           <div className="flex flex-wrap gap-1.5">
             <AssigneePickerChip value={assignee} onChange={setAssignee} members={members} />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label>Space</Label>
+          <div className="flex flex-wrap gap-1.5">
+            <SpacePickerChip value={spaceId} onChange={setSpaceId} spaces={spaces} />
           </div>
         </div>
       </form>

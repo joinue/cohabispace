@@ -42,6 +42,7 @@ export async function createTaskAction(
     dueAt: formData.get("dueAt") ?? undefined,
     assignedTo: formData.get("assignedTo") ?? undefined,
     parentTaskId: formData.get("parentTaskId") ?? undefined,
+    spaceId: formData.get("spaceId") ?? undefined,
   });
   if (!parsed.success) return { fieldErrors: fieldErrorsFromZod(parsed.error.issues) };
 
@@ -53,12 +54,12 @@ export async function createTaskAction(
     due_at: emptyToNull(parsed.data.dueAt),
     assigned_to: emptyToNull(parsed.data.assignedTo),
     parent_task_id: emptyToNull(parsed.data.parentTaskId),
+    space_id: emptyToNull(parsed.data.spaceId),
     created_by: user.id,
   });
   if (error) return { error: error.message };
 
-  revalidatePath("/dashboard");
-  revalidatePath("/tasks");
+  revalidatePath("/", "layout");
   return {};
 }
 
@@ -85,8 +86,7 @@ export async function completeTaskAction(taskId: string) {
     })
     .eq("id", taskId);
 
-  revalidatePath("/dashboard");
-  revalidatePath("/tasks");
+  revalidatePath("/", "layout");
 }
 
 export async function uncompleteTaskAction(taskId: string) {
@@ -108,8 +108,7 @@ export async function uncompleteTaskAction(taskId: string) {
     .update({ status: "pending", completed_at: null, completed_by: null })
     .eq("id", taskId);
 
-  revalidatePath("/dashboard");
-  revalidatePath("/tasks");
+  revalidatePath("/", "layout");
 }
 
 export async function deleteTaskAction(taskId: string) {
@@ -133,8 +132,7 @@ export async function deleteTaskAction(taskId: string) {
 
   await service.from("tasks").delete().eq("id", taskId);
 
-  revalidatePath("/dashboard");
-  revalidatePath("/tasks");
+  revalidatePath("/", "layout");
 }
 
 export async function updateTaskAction(
@@ -160,6 +158,7 @@ export async function updateTaskAction(
     notes: formData.get("notes") ?? undefined,
     dueAt: formData.get("dueAt") ?? undefined,
     assignedTo: formData.get("assignedTo") ?? undefined,
+    spaceId: formData.get("spaceId") ?? undefined,
   });
   if (!parsed.success) return { fieldErrors: fieldErrorsFromZod(parsed.error.issues) };
 
@@ -169,13 +168,13 @@ export async function updateTaskAction(
   if (parsed.data.dueAt !== undefined) update.due_at = emptyToNull(parsed.data.dueAt);
   if (parsed.data.assignedTo !== undefined)
     update.assigned_to = emptyToNull(parsed.data.assignedTo);
+  if (parsed.data.spaceId !== undefined) update.space_id = emptyToNull(parsed.data.spaceId);
 
   if (Object.keys(update).length === 0) return {};
 
   const { error } = await service.from("tasks").update(update).eq("id", taskId);
   if (error) return { error: error.message };
 
-  revalidatePath("/dashboard");
-  revalidatePath("/tasks");
+  revalidatePath("/", "layout");
   return {};
 }

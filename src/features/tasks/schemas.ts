@@ -25,6 +25,7 @@ export const createTaskSchema = z.object({
   dueAt: dueAtSchema,
   assignedTo: uuidSchema,
   parentTaskId: uuidSchema,
+  spaceId: uuidSchema,
 });
 
 export const updateTaskSchema = createTaskSchema.partial();

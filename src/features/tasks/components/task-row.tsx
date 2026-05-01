@@ -20,8 +20,10 @@ import {
 } from "@/features/tasks/actions";
 import { EditTaskSheet } from "@/features/tasks/components/edit-task-sheet";
 import { classifyDue, formatDueDate } from "@/features/tasks/utils";
+import { SpacePill } from "@/features/spaces/components/space-pill";
 import type { HouseholdMember } from "@/features/households/queries";
-import type { TaskWithAssignee } from "@/features/tasks/queries";
+import type { SpaceRow } from "@/features/spaces/queries";
+import type { TaskWithRelations } from "@/features/tasks/queries";
 
 function initials(name: string | null, email: string): string {
   const source = (name?.trim() || email).trim();
@@ -44,7 +46,18 @@ const DUE_TONE: Record<string, string> = {
   noDate: "text-muted-foreground",
 };
 
-export function TaskRow({ task, members }: { task: TaskWithAssignee; members: HouseholdMember[] }) {
+export function TaskRow({
+  task,
+  members,
+  spaces,
+  showSpacePill = true,
+}: {
+  task: TaskWithRelations;
+  members: HouseholdMember[];
+  spaces: SpaceRow[];
+  /** When viewing a single space, hide the per-row pill (it's redundant). */
+  showSpacePill?: boolean;
+}) {
   const serverChecked = task.status === "completed";
   const [optimisticChecked, setOptimisticChecked] = useOptimistic(serverChecked);
   const [pending, startTransition] = useTransition();
@@ -93,12 +106,13 @@ export function TaskRow({ task, members }: { task: TaskWithAssignee; members: Ho
         >
           <span
             className={cn(
-              "flex-1 truncate text-sm",
+              "min-w-0 flex-1 truncate text-sm",
               isComplete && "text-muted-foreground line-through",
             )}
           >
             {task.title}
           </span>
+          {showSpacePill && task.space ? <SpacePill space={task.space} size="xs" /> : null}
           {dueLabel ? (
             <span className={cn("shrink-0 text-xs tabular-nums", dueTone)}>{dueLabel}</span>
           ) : null}
@@ -140,7 +154,13 @@ export function TaskRow({ task, members }: { task: TaskWithAssignee; members: Ho
           </DropdownMenuContent>
         </DropdownMenu>
       </li>
-      <EditTaskSheet task={task} members={members} open={editOpen} onOpenChange={setEditOpen} />
+      <EditTaskSheet
+        task={task}
+        members={members}
+        spaces={spaces}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+      />
     </>
   );
 }

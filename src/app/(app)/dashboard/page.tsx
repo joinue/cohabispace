@@ -9,6 +9,7 @@ import {
   getHouseholdMembers,
   getMyHouseholds,
 } from "@/features/households/queries";
+import { getActiveSpaces } from "@/features/spaces/queries";
 import { QuickAddTask } from "@/features/tasks/components/quick-add-task";
 import { TaskList } from "@/features/tasks/components/task-list";
 import { getPendingTasks } from "@/features/tasks/queries";
@@ -24,9 +25,10 @@ export default async function DashboardPage() {
   const active = await getActiveHousehold();
   if (!active) redirect("/households/new" as Route);
 
-  const [tasks, members] = await Promise.all([
+  const [tasks, members, spaces] = await Promise.all([
     getPendingTasks(active.id),
     getHouseholdMembers(active.id),
+    getActiveSpaces(active.id),
   ]);
 
   return (
@@ -34,7 +36,7 @@ export default async function DashboardPage() {
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1.5">
           <p className="text-muted-foreground font-mono text-[11px] tracking-widest uppercase">
-            Dashboard
+            All tasks
           </p>
           <h1 className="text-3xl font-semibold tracking-tight">{active.name}</h1>
         </div>
@@ -47,9 +49,9 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      <QuickAddTask householdId={active.id} members={members} />
+      <QuickAddTask householdId={active.id} members={members} spaces={spaces} />
 
-      <TaskList tasks={tasks} members={members} />
+      <TaskList tasks={tasks} members={members} spaces={spaces} />
     </div>
   );
 }
