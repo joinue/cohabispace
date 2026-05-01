@@ -1,0 +1,7 @@
+-- ============================================================================
+-- Seed data — currently empty.
+--
+-- Future: US national calendar (federal holidays, tax deadlines, DST,
+-- Election Day, common observances) will be seeded into a `national_events`
+-- table introduced in Phase 3.
+-- ============================================================================

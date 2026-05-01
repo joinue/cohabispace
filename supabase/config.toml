@@ -1,0 +1,19 @@
+# Cohabispace — local Supabase CLI configuration.
+# Project ref is read from the linked project after `supabase link`.
+project_id = "cohabispace"
+
+[db]
+major_version = 15
+
+[auth]
+site_url = "http://localhost:3001"
+additional_redirect_urls = ["http://localhost:3001/api/auth/callback"]
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = true
+
+[storage]
+enabled = false
