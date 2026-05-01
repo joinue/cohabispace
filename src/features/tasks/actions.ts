@@ -6,6 +6,7 @@ import { createSupabaseServiceClient } from "@/lib/supabase/service";
 import { requireUser } from "@/lib/dal";
 import { type FormState, fieldErrorsFromZod } from "@/lib/forms";
 import { createTaskSchema, updateTaskSchema } from "@/features/tasks/schemas";
+import { nextOccurrence } from "@/features/tasks/recurrence";
 import type { Database } from "@/lib/supabase/database.types";
 
 type TaskUpdate = Database["public"]["Tables"]["tasks"]["Update"];
@@ -43,6 +44,7 @@ export async function createTaskAction(
     assignedTo: formData.get("assignedTo") ?? undefined,
     parentTaskId: formData.get("parentTaskId") ?? undefined,
     spaceId: formData.get("spaceId") ?? undefined,
+    rrule: formData.get("rrule") ?? undefined,
   });
   if (!parsed.success) return { fieldErrors: fieldErrorsFromZod(parsed.error.issues) };
 
@@ -55,6 +57,7 @@ export async function createTaskAction(
     assigned_to: emptyToNull(parsed.data.assignedTo),
     parent_task_id: emptyToNull(parsed.data.parentTaskId),
     space_id: emptyToNull(parsed.data.spaceId),
+    rrule: emptyToNull(parsed.data.rrule),
     created_by: user.id,
   });
   if (error) return { error: error.message };
@@ -67,15 +70,33 @@ export async function completeTaskAction(taskId: string) {
   const user = await requireUser();
   const service = createSupabaseServiceClient();
 
-  const { data: task } = await service
-    .from("tasks")
-    .select("household_id")
-    .eq("id", taskId)
-    .maybeSingle();
+  const { data: task } = await service.from("tasks").select("*").eq("id", taskId).maybeSingle();
   if (!task) return;
 
   const member = await requireMembership(user.id, task.household_id);
   if (!member.ok) return;
+
+  // If this is a recurring task with a due date, spawn the next instance
+  // BEFORE marking the current one complete — so a transient error doesn't
+  // leave the user without their next occurrence.
+  if (task.rrule && task.due_at) {
+    const next = nextOccurrence(task.rrule, new Date(task.due_at));
+    if (next) {
+      await service.from("tasks").insert({
+        household_id: task.household_id,
+        title: task.title,
+        notes: task.notes,
+        due_at: next.toISOString(),
+        assigned_to: task.assigned_to,
+        space_id: task.space_id,
+        parent_task_id: task.parent_task_id,
+        series_id: task.series_id,
+        rrule: task.rrule,
+        tags: task.tags,
+        created_by: task.created_by,
+      });
+    }
+  }
 
   await service
     .from("tasks")
@@ -159,6 +180,7 @@ export async function updateTaskAction(
     dueAt: formData.get("dueAt") ?? undefined,
     assignedTo: formData.get("assignedTo") ?? undefined,
     spaceId: formData.get("spaceId") ?? undefined,
+    rrule: formData.get("rrule") ?? undefined,
   });
   if (!parsed.success) return { fieldErrors: fieldErrorsFromZod(parsed.error.issues) };
 
@@ -169,6 +191,7 @@ export async function updateTaskAction(
   if (parsed.data.assignedTo !== undefined)
     update.assigned_to = emptyToNull(parsed.data.assignedTo);
   if (parsed.data.spaceId !== undefined) update.space_id = emptyToNull(parsed.data.spaceId);
+  if (parsed.data.rrule !== undefined) update.rrule = emptyToNull(parsed.data.rrule);
 
   if (Object.keys(update).length === 0) return {};
 

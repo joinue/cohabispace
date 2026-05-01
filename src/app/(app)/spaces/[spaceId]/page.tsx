@@ -7,11 +7,10 @@ import {
   getMyHouseholds,
 } from "@/features/households/queries";
 import { getActiveSpaces } from "@/features/spaces/queries";
-import { SPACE_COLOR_TOKENS } from "@/features/spaces/colors";
+import { SpaceMark } from "@/features/spaces/components/space-mark";
 import { QuickAddTask } from "@/features/tasks/components/quick-add-task";
 import { TaskList } from "@/features/tasks/components/task-list";
 import { getPendingTasks } from "@/features/tasks/queries";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Space" };
 
@@ -32,17 +31,10 @@ export default async function SpacePage({ params }: { params: Promise<{ spaceId:
     getHouseholdMembers(active.id),
   ]);
 
-  const tokens = SPACE_COLOR_TOKENS[space.color];
-
   return (
     <div className="flex flex-col gap-8">
       <div className="flex items-center gap-3">
-        <div
-          className={cn("grid size-12 shrink-0 place-items-center rounded-2xl text-2xl", tokens.bg)}
-          aria-hidden="true"
-        >
-          {space.icon ?? "•"}
-        </div>
+        <SpaceMark space={space} size="lg" />
         <div className="flex flex-col gap-0.5">
           <p className="text-muted-foreground font-mono text-[11px] tracking-widest uppercase">
             Space

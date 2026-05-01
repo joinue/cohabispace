@@ -21,6 +21,7 @@ import { FormFieldError } from "@/features/auth/components/form-field-error";
 import { deleteTaskAction, updateTaskAction } from "@/features/tasks/actions";
 import { AssigneePickerChip } from "@/features/tasks/components/assignee-picker-chip";
 import { DatePickerChip } from "@/features/tasks/components/date-picker-chip";
+import { RecurrencePickerChip } from "@/features/tasks/components/recurrence-picker-chip";
 import { SpacePickerChip } from "@/features/spaces/components/space-picker-chip";
 import type { HouseholdMember } from "@/features/households/queries";
 import type { SpaceRow } from "@/features/spaces/queries";
@@ -70,7 +71,17 @@ function EditTaskFormBody({
   const [date, setDate] = useState<Date | null>(task.due_at ? new Date(task.due_at) : null);
   const [assignee, setAssignee] = useState<string | null>(task.assigned_to);
   const [spaceId, setSpaceId] = useState<string | null>(task.space_id);
+  const [rrule, setRrule] = useState<string | null>(task.rrule);
   const [deletePending, startDelete] = useTransition();
+
+  const handleRrule = (next: string | null) => {
+    if (next && !date) {
+      const today = new Date();
+      today.setHours(12, 0, 0, 0);
+      setDate(today);
+    }
+    setRrule(next);
+  };
 
   const wrappedAction = async (prev: FormState, formData: FormData): Promise<FormState> => {
     const result = await updateTaskAction(task.id, prev, formData);
@@ -104,6 +115,7 @@ function EditTaskFormBody({
         <input type="hidden" name="dueAt" value={date ? date.toISOString() : ""} />
         <input type="hidden" name="assignedTo" value={assignee ?? ""} />
         <input type="hidden" name="spaceId" value={spaceId ?? ""} />
+        <input type="hidden" name="rrule" value={rrule ?? ""} />
 
         {state?.error ? (
           <Alert variant="destructive">
@@ -158,6 +170,13 @@ function EditTaskFormBody({
           <Label>Space</Label>
           <div className="flex flex-wrap gap-1.5">
             <SpacePickerChip value={spaceId} onChange={setSpaceId} spaces={spaces} />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label>Repeat</Label>
+          <div className="flex flex-wrap gap-1.5">
+            <RecurrencePickerChip value={rrule} anchor={date} onChange={handleRrule} />
           </div>
         </div>
       </form>

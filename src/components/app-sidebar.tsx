@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { CheckSquareIcon, FolderIcon, SettingsIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { SPACE_COLOR_TOKENS } from "@/features/spaces/colors";
+import { SpaceMark } from "@/features/spaces/components/space-mark";
 import type { SpaceRow } from "@/features/spaces/queries";
 
 export function AppSidebar({
@@ -37,30 +37,17 @@ export function AppSidebar({
             Your household has no spaces yet.
           </p>
         ) : (
-          spaces.map((s) => {
-            const tokens = SPACE_COLOR_TOKENS[s.color];
-            return (
-              <SidebarLink
-                key={s.id}
-                href={`/spaces/${s.id}`}
-                active={pathname === `/spaces/${s.id}`}
-                onNavigate={onNavigate}
-                icon={
-                  <span
-                    className={cn(
-                      "grid size-5 shrink-0 place-items-center rounded-full text-[11px]",
-                      tokens.bg,
-                    )}
-                    aria-hidden="true"
-                  >
-                    {s.icon ?? "•"}
-                  </span>
-                }
-              >
-                {s.name}
-              </SidebarLink>
-            );
-          })
+          spaces.map((s) => (
+            <SidebarLink
+              key={s.id}
+              href={`/spaces/${s.id}`}
+              active={pathname === `/spaces/${s.id}`}
+              onNavigate={onNavigate}
+              icon={<SpaceMark space={s} size="sm" />}
+            >
+              {s.name}
+            </SidebarLink>
+          ))
         )}
       </SidebarSection>
 

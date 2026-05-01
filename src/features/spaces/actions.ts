@@ -43,7 +43,6 @@ export async function createSpaceAction(
 
   const parsed = createSpaceSchema.safeParse({
     name: formData.get("name"),
-    icon: formData.get("icon") ?? undefined,
     color: formData.get("color") ?? undefined,
   });
   if (!parsed.success) return { fieldErrors: fieldErrorsFromZod(parsed.error.issues) };
@@ -64,7 +63,6 @@ export async function createSpaceAction(
   const insert: SpaceInsert = {
     household_id: householdId,
     name: parsed.data.name,
-    icon: parsed.data.icon ?? null,
     color: parsed.data.color,
     position: nextPos,
     created_by: user.id,
@@ -97,14 +95,12 @@ export async function updateSpaceAction(
 
   const parsed = updateSpaceSchema.safeParse({
     name: formData.get("name") ?? undefined,
-    icon: formData.get("icon") ?? undefined,
     color: formData.get("color") ?? undefined,
   });
   if (!parsed.success) return { fieldErrors: fieldErrorsFromZod(parsed.error.issues) };
 
   const update: SpaceUpdate = {};
   if (parsed.data.name !== undefined) update.name = parsed.data.name;
-  if (parsed.data.icon !== undefined) update.icon = parsed.data.icon ?? null;
   if (parsed.data.color !== undefined) update.color = parsed.data.color;
 
   if (Object.keys(update).length === 0) return {};

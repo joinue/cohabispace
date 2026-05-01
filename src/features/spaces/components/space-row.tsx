@@ -23,8 +23,8 @@ import {
   deleteSpaceAction,
   unarchiveSpaceAction,
 } from "@/features/spaces/actions";
-import { SPACE_COLOR_TOKENS } from "@/features/spaces/colors";
 import { EditSpaceSheet } from "@/features/spaces/components/edit-space-sheet";
+import { SpaceMark } from "@/features/spaces/components/space-mark";
 import type { SpaceRow as SpaceRowType } from "@/features/spaces/queries";
 
 export function SpaceRow({
@@ -38,7 +38,6 @@ export function SpaceRow({
 }) {
   const [pending, startTransition] = useTransition();
   const [editOpen, setEditOpen] = useState(false);
-  const tokens = SPACE_COLOR_TOKENS[space.color];
 
   const archive = () =>
     startTransition(async () => {
@@ -61,12 +60,7 @@ export function SpaceRow({
           pending && "pointer-events-none opacity-50",
         )}
       >
-        <div
-          className={cn("grid size-8 shrink-0 place-items-center rounded-lg text-base", tokens.bg)}
-          aria-hidden="true"
-        >
-          {space.icon ?? "•"}
-        </div>
+        <SpaceMark space={space} size="md" />
         <span className="text-foreground flex-1 truncate text-sm">{space.name}</span>
         <DropdownMenu>
           <DropdownMenuTrigger

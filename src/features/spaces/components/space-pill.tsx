@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { SPACE_COLOR_TOKENS } from "@/features/spaces/colors";
+import { SpaceMark } from "@/features/spaces/components/space-mark";
 import type { SpaceRow } from "@/features/spaces/queries";
 
 export function SpacePill({
@@ -7,7 +8,7 @@ export function SpacePill({
   size = "sm",
   className,
 }: {
-  space: Pick<SpaceRow, "name" | "icon" | "color">;
+  space: Pick<SpaceRow, "name" | "color">;
   size?: "xs" | "sm";
   className?: string;
 }) {
@@ -22,7 +23,7 @@ export function SpacePill({
         className,
       )}
     >
-      {space.icon ? <span aria-hidden="true">{space.icon}</span> : null}
+      <SpaceMark space={space} size="xs" className="bg-transparent" />
       <span className="truncate">{space.name}</span>
     </span>
   );

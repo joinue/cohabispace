@@ -41,20 +41,6 @@ export function CreateSpaceForm({ householdId }: { householdId: string }) {
       ) : null}
 
       <div className="flex items-end gap-2">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="space-icon" className="text-xs">
-            Icon
-          </Label>
-          <Input
-            id="space-icon"
-            name="icon"
-            type="text"
-            maxLength={4}
-            placeholder="🏠"
-            className="h-9 w-14 text-center"
-            aria-invalid={Boolean(state?.fieldErrors?.icon)}
-          />
-        </div>
         <div className="flex flex-1 flex-col gap-1.5">
           <Label htmlFor="space-name" className="text-xs">
             Name

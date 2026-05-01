@@ -10,16 +10,8 @@ const nameSchema = z
   .min(1, "Give the space a name")
   .max(60, "60 characters or fewer");
 
-const iconSchema = z
-  .string()
-  .trim()
-  .max(8, "Icons must be a single emoji")
-  .optional()
-  .transform((v) => (v && v.length > 0 ? v : undefined));
-
 export const createSpaceSchema = z.object({
   name: nameSchema,
-  icon: iconSchema,
   color: spaceColorSchema.default("slate"),
 });
 

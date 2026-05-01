@@ -1,7 +1,7 @@
 "use client";
 
 import { useOptimistic, useState, useTransition } from "react";
-import { MoreHorizontalIcon, PencilIcon, TrashIcon } from "lucide-react";
+import { MoreHorizontalIcon, PencilIcon, RepeatIcon, TrashIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -106,11 +106,14 @@ export function TaskRow({
         >
           <span
             className={cn(
-              "min-w-0 flex-1 truncate text-sm",
+              "flex min-w-0 flex-1 items-center gap-1.5 text-sm",
               isComplete && "text-muted-foreground line-through",
             )}
           >
-            {task.title}
+            <span className="truncate">{task.title}</span>
+            {task.rrule ? (
+              <RepeatIcon className="text-muted-foreground size-3 shrink-0" aria-label="Repeats" />
+            ) : null}
           </span>
           {showSpacePill && task.space ? <SpacePill space={task.space} size="xs" /> : null}
           {dueLabel ? (

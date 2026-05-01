@@ -5,7 +5,7 @@ import { CheckIcon, FolderIcon } from "lucide-react";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { SPACE_COLOR_TOKENS } from "@/features/spaces/colors";
+import { SpaceMark } from "@/features/spaces/components/space-mark";
 import type { SpaceRow } from "@/features/spaces/queries";
 
 export function SpacePickerChip({
@@ -32,13 +32,13 @@ export function SpacePickerChip({
       <PopoverTrigger
         aria-label={ariaLabel}
         className={cn(
-          "border-input bg-background hover:bg-muted inline-flex h-8 items-center gap-1.5 rounded-full border px-2.5 text-xs font-medium transition-colors outline-none",
+          "border-input bg-background hover:bg-muted inline-flex h-8 items-center gap-1.5 rounded-full border px-2 text-xs font-medium transition-colors outline-none",
           "focus-visible:ring-ring/50 focus-visible:ring-2",
-          selected ? "text-foreground" : "text-muted-foreground",
+          selected ? "text-foreground pr-2.5" : "text-muted-foreground px-2.5",
         )}
       >
         {selected ? (
-          <span aria-hidden="true">{selected.icon ?? "•"}</span>
+          <SpaceMark space={selected} size="xs" />
         ) : (
           <FolderIcon className="size-3.5" aria-hidden="true" />
         )}
@@ -62,7 +62,6 @@ export function SpacePickerChip({
         {spaces.length > 0 ? <div className="bg-border my-1 h-px" /> : null}
         {spaces.map((s) => {
           const checked = s.id === value;
-          const tokens = SPACE_COLOR_TOKENS[s.color];
           return (
             <button
               key={s.id}
@@ -74,15 +73,7 @@ export function SpacePickerChip({
               )}
             >
               <span className="flex min-w-0 items-center gap-2">
-                <span
-                  className={cn(
-                    "grid size-5 shrink-0 place-items-center rounded-full text-[11px]",
-                    tokens.bg,
-                  )}
-                  aria-hidden="true"
-                >
-                  {s.icon ?? "•"}
-                </span>
+                <SpaceMark space={s} size="sm" />
                 <span className="truncate">{s.name}</span>
               </span>
               {checked ? <CheckIcon className="size-4 shrink-0" aria-hidden="true" /> : null}

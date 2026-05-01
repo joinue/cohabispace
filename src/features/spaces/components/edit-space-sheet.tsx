@@ -79,39 +79,22 @@ function EditSpaceFormBody({ space, onClose }: { space: SpaceRow; onClose: () =>
           </Alert>
         ) : null}
 
-        <div className="flex items-end gap-2">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="edit-space-icon" className="text-xs">
-              Icon
-            </Label>
-            <Input
-              id="edit-space-icon"
-              name="icon"
-              type="text"
-              maxLength={4}
-              defaultValue={space.icon ?? ""}
-              className="h-9 w-14 text-center"
-              aria-invalid={Boolean(state?.fieldErrors?.icon)}
-            />
-          </div>
-          <div className="flex flex-1 flex-col gap-1.5">
-            <Label htmlFor="edit-space-name" className="text-xs">
-              Name
-            </Label>
-            <Input
-              id="edit-space-name"
-              name="name"
-              type="text"
-              required
-              maxLength={60}
-              defaultValue={space.name}
-              className="h-9"
-              aria-invalid={Boolean(state?.fieldErrors?.name)}
-            />
-          </div>
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="edit-space-name" className="text-xs">
+            Name
+          </Label>
+          <Input
+            id="edit-space-name"
+            name="name"
+            type="text"
+            required
+            maxLength={60}
+            defaultValue={space.name}
+            className="h-9"
+            aria-invalid={Boolean(state?.fieldErrors?.name)}
+          />
+          <FormFieldError messages={state?.fieldErrors?.name} />
         </div>
-
-        <FormFieldError messages={state?.fieldErrors?.name} />
 
         <div className="flex flex-col gap-2">
           <Label className="text-xs">Color</Label>

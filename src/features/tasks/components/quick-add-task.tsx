@@ -11,10 +11,17 @@ import { FormFieldError } from "@/features/auth/components/form-field-error";
 import { createTaskAction } from "@/features/tasks/actions";
 import { AssigneePickerChip } from "@/features/tasks/components/assignee-picker-chip";
 import { DatePickerChip } from "@/features/tasks/components/date-picker-chip";
+import { RecurrencePickerChip } from "@/features/tasks/components/recurrence-picker-chip";
 import { SpacePickerChip } from "@/features/spaces/components/space-picker-chip";
 import type { HouseholdMember } from "@/features/households/queries";
 import type { SpaceRow } from "@/features/spaces/queries";
 import type { FormState } from "@/lib/forms";
+
+function setNoon(d: Date): Date {
+  const out = new Date(d);
+  out.setHours(12, 0, 0, 0);
+  return out;
+}
 
 export function QuickAddTask({
   householdId,
@@ -31,6 +38,13 @@ export function QuickAddTask({
   const [date, setDate] = useState<Date | null>(null);
   const [assignee, setAssignee] = useState<string | null>(null);
   const [spaceId, setSpaceId] = useState<string | null>(defaultSpaceId);
+  const [rrule, setRrule] = useState<string | null>(null);
+
+  const handleRrule = (next: string | null) => {
+    // Picking a recurrence pattern with no date implies "starting today".
+    if (next && !date) setDate(setNoon(new Date()));
+    setRrule(next);
+  };
 
   const wrappedAction = async (prev: FormState, formData: FormData): Promise<FormState> => {
     const result = await createTaskAction(householdId, prev, formData);
@@ -39,6 +53,7 @@ export function QuickAddTask({
       setDate(null);
       setAssignee(null);
       setSpaceId(defaultSpaceId);
+      setRrule(null);
     }
     return result;
   };
@@ -50,6 +65,7 @@ export function QuickAddTask({
       <input type="hidden" name="dueAt" value={date ? date.toISOString() : ""} />
       <input type="hidden" name="assignedTo" value={assignee ?? ""} />
       <input type="hidden" name="spaceId" value={spaceId ?? ""} />
+      <input type="hidden" name="rrule" value={rrule ?? ""} />
 
       <div className="flex items-center gap-2">
         <Input
@@ -73,6 +89,7 @@ export function QuickAddTask({
         <DatePickerChip value={date} onChange={setDate} />
         <AssigneePickerChip value={assignee} onChange={setAssignee} members={members} />
         <SpacePickerChip value={spaceId} onChange={setSpaceId} spaces={spaces} />
+        <RecurrencePickerChip value={rrule} anchor={date} onChange={handleRrule} />
       </div>
 
       <FormFieldError messages={state?.fieldErrors?.title} />

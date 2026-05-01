@@ -19,6 +19,13 @@ const dueAtSchema = z
 
 const uuidSchema = z.string().uuid().optional();
 
+const rruleSchema = z
+  .string()
+  .trim()
+  .max(1000)
+  .optional()
+  .transform((v) => (v && v.length > 0 ? v : undefined));
+
 export const createTaskSchema = z.object({
   title: titleSchema,
   notes: notesSchema,
@@ -26,6 +33,7 @@ export const createTaskSchema = z.object({
   assignedTo: uuidSchema,
   parentTaskId: uuidSchema,
   spaceId: uuidSchema,
+  rrule: rruleSchema,
 });
 
 export const updateTaskSchema = createTaskSchema.partial();
