@@ -2,7 +2,7 @@ import { TaskRow } from "@/features/tasks/components/task-row";
 import { DUE_GROUP_ORDER, type DueGroup, groupTasksByDue } from "@/features/tasks/utils";
 import type { HouseholdMember } from "@/features/households/queries";
 import type { SpaceRow } from "@/features/spaces/queries";
-import type { TaskWithRelations } from "@/features/tasks/queries";
+import type { TaskWithSubtasks } from "@/features/tasks/queries";
 
 export function TaskList({
   tasks,
@@ -11,7 +11,7 @@ export function TaskList({
   showSpacePill = true,
   emptyMessage = "No tasks yet. Add one above to get started.",
 }: {
-  tasks: TaskWithRelations[];
+  tasks: TaskWithSubtasks[];
   members: HouseholdMember[];
   spaces: SpaceRow[];
   showSpacePill?: boolean;
@@ -55,7 +55,7 @@ function Section({
 }: {
   groupKey: DueGroup;
   label: string;
-  tasks: TaskWithRelations[];
+  tasks: TaskWithSubtasks[];
   members: HouseholdMember[];
   spaces: SpaceRow[];
   showSpacePill: boolean;
@@ -81,6 +81,7 @@ function Section({
             task={t}
             members={members}
             spaces={spaces}
+            subtasks={t.subtasks}
             showSpacePill={showSpacePill}
           />
         ))}

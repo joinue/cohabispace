@@ -22,6 +22,8 @@ import { deleteTaskAction, updateTaskAction } from "@/features/tasks/actions";
 import { AssigneePickerChip } from "@/features/tasks/components/assignee-picker-chip";
 import { DatePickerChip } from "@/features/tasks/components/date-picker-chip";
 import { RecurrencePickerChip } from "@/features/tasks/components/recurrence-picker-chip";
+import { SubtaskQuickAdd } from "@/features/tasks/components/subtask-quick-add";
+import { SubtaskRow } from "@/features/tasks/components/subtask-row";
 import { SpacePickerChip } from "@/features/spaces/components/space-picker-chip";
 import type { HouseholdMember } from "@/features/households/queries";
 import type { SpaceRow } from "@/features/spaces/queries";
@@ -32,12 +34,15 @@ export function EditTaskSheet({
   task,
   members,
   spaces,
+  subtasks = [],
   open,
   onOpenChange,
 }: {
   task: TaskWithRelations;
   members: HouseholdMember[];
   spaces: SpaceRow[];
+  /** Children of this task. Only relevant when task is top-level. */
+  subtasks?: TaskWithRelations[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
@@ -50,6 +55,7 @@ export function EditTaskSheet({
           task={task}
           members={members}
           spaces={spaces}
+          subtasks={subtasks}
           onClose={() => onOpenChange(false)}
         />
       </SheetContent>
@@ -61,11 +67,13 @@ function EditTaskFormBody({
   task,
   members,
   spaces,
+  subtasks,
   onClose,
 }: {
   task: TaskWithRelations;
   members: HouseholdMember[];
   spaces: SpaceRow[];
+  subtasks: TaskWithRelations[];
   onClose: () => void;
 }) {
   const [date, setDate] = useState<Date | null>(task.due_at ? new Date(task.due_at) : null);
@@ -179,6 +187,25 @@ function EditTaskFormBody({
             <RecurrencePickerChip value={rrule} anchor={date} onChange={handleRrule} />
           </div>
         </div>
+
+        {task.parent_task_id === null ? (
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <Label>Subtasks</Label>
+              {subtasks.length > 0 ? (
+                <span className="text-muted-foreground text-xs tabular-nums">
+                  {subtasks.filter((s) => s.status === "completed").length} / {subtasks.length}
+                </span>
+              ) : null}
+            </div>
+            <ul className="flex flex-col">
+              {subtasks.map((s) => (
+                <SubtaskRow key={s.id} task={s} />
+              ))}
+            </ul>
+            <SubtaskQuickAdd householdId={task.household_id} parentTaskId={task.id} />
+          </div>
+        ) : null}
       </form>
 
       <SheetFooter className="flex flex-row items-center justify-between gap-2 border-t px-5 py-3">

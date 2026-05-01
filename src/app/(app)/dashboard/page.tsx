@@ -12,7 +12,7 @@ import {
 import { getActiveSpaces } from "@/features/spaces/queries";
 import { QuickAddTask } from "@/features/tasks/components/quick-add-task";
 import { TaskList } from "@/features/tasks/components/task-list";
-import { getPendingTasks } from "@/features/tasks/queries";
+import { getPendingTasks, withSubtasks } from "@/features/tasks/queries";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
@@ -25,11 +25,12 @@ export default async function DashboardPage() {
   const active = await getActiveHousehold();
   if (!active) redirect("/households/new" as Route);
 
-  const [tasks, members, spaces] = await Promise.all([
+  const [topLevel, members, spaces] = await Promise.all([
     getPendingTasks(active.id),
     getHouseholdMembers(active.id),
     getActiveSpaces(active.id),
   ]);
+  const tasks = await withSubtasks(topLevel);
 
   return (
     <div className="flex flex-col gap-8">

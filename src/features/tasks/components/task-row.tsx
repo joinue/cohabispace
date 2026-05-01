@@ -1,7 +1,7 @@
 "use client";
 
 import { useOptimistic, useState, useTransition } from "react";
-import { MoreHorizontalIcon, PencilIcon, RepeatIcon, TrashIcon } from "lucide-react";
+import { ListTreeIcon, MoreHorizontalIcon, PencilIcon, RepeatIcon, TrashIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -50,11 +50,13 @@ export function TaskRow({
   task,
   members,
   spaces,
+  subtasks = [],
   showSpacePill = true,
 }: {
   task: TaskWithRelations;
   members: HouseholdMember[];
   spaces: SpaceRow[];
+  subtasks?: TaskWithRelations[];
   /** When viewing a single space, hide the per-row pill (it's redundant). */
   showSpacePill?: boolean;
 }) {
@@ -81,6 +83,8 @@ export function TaskRow({
   const dueLabel = formatDueDate(task.due_at);
   const dueTone = DUE_TONE[classifyDue(task.due_at)] ?? "text-muted-foreground";
   const isComplete = optimisticChecked;
+  const subtaskTotal = subtasks.length;
+  const subtaskDone = subtasks.filter((s) => s.status === "completed").length;
 
   return (
     <>
@@ -113,6 +117,15 @@ export function TaskRow({
             <span className="truncate">{task.title}</span>
             {task.rrule ? (
               <RepeatIcon className="text-muted-foreground size-3 shrink-0" aria-label="Repeats" />
+            ) : null}
+            {subtaskTotal > 0 ? (
+              <span
+                className="text-muted-foreground inline-flex shrink-0 items-center gap-0.5 text-[11px] tabular-nums"
+                aria-label={`${subtaskDone} of ${subtaskTotal} subtasks done`}
+              >
+                <ListTreeIcon className="size-3" aria-hidden="true" />
+                {subtaskDone}/{subtaskTotal}
+              </span>
             ) : null}
           </span>
           {showSpacePill && task.space ? <SpacePill space={task.space} size="xs" /> : null}
@@ -161,6 +174,7 @@ export function TaskRow({
         task={task}
         members={members}
         spaces={spaces}
+        subtasks={subtasks}
         open={editOpen}
         onOpenChange={setEditOpen}
       />

@@ -24,6 +24,10 @@ export interface TaskWithRelations extends TaskRow {
   } | null;
 }
 
+export interface TaskWithSubtasks extends TaskWithRelations {
+  subtasks: TaskWithRelations[];
+}
+
 /** @deprecated alias kept for callers — prefer `TaskWithRelations`. */
 export type TaskWithAssignee = TaskWithRelations;
 
@@ -60,6 +64,45 @@ export const getPendingTasks = cache(
   },
 );
 
+/**
+ * Bulk-fetch subtasks for a set of parent task IDs. Returned tasks include
+ * both pending and completed (so users can see the project's history in
+ * the drawer); skipped is excluded.
+ */
+export const getSubtasksByParents = cache(
+  async (parentIds: readonly string[]): Promise<Map<string, TaskWithRelations[]>> => {
+    if (parentIds.length === 0) return new Map();
+    await requireUser();
+    const supabase = await createSupabaseServerClient();
+
+    const { data, error } = await supabase
+      .from("tasks")
+      .select(TASK_SELECT)
+      .in("parent_task_id", parentIds as string[])
+      .in("status", ["pending", "completed"])
+      .order("status", { ascending: true })
+      .order("position", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: true });
+
+    if (error) throwQueryError(error, "Loading subtasks");
+
+    const map = new Map<string, TaskWithRelations[]>();
+    for (const row of (data ?? []) as unknown as TaskWithRelations[]) {
+      if (!row.parent_task_id) continue;
+      const list = map.get(row.parent_task_id) ?? [];
+      list.push(row);
+      map.set(row.parent_task_id, list);
+    }
+    return map;
+  },
+);
+
+/** Combine top-level tasks with their pending/completed children. */
+export async function withSubtasks(topLevel: TaskWithRelations[]): Promise<TaskWithSubtasks[]> {
+  const map = await getSubtasksByParents(topLevel.map((t) => t.id));
+  return topLevel.map((t) => ({ ...t, subtasks: map.get(t.id) ?? [] }));
+}
+
 export const getCompletedTasks = cache(
   async (householdId: string, limit = 50): Promise<TaskWithRelations[]> => {
     await requireUser();
@@ -70,6 +113,7 @@ export const getCompletedTasks = cache(
       .select(TASK_SELECT)
       .eq("household_id", householdId)
       .eq("status", "completed")
+      .is("parent_task_id", null)
       .order("completed_at", { ascending: false })
       .limit(limit);
 

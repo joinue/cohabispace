@@ -10,7 +10,7 @@ import { getActiveSpaces } from "@/features/spaces/queries";
 import { SpaceMark } from "@/features/spaces/components/space-mark";
 import { QuickAddTask } from "@/features/tasks/components/quick-add-task";
 import { TaskList } from "@/features/tasks/components/task-list";
-import { getPendingTasks } from "@/features/tasks/queries";
+import { getPendingTasks, withSubtasks } from "@/features/tasks/queries";
 
 export const metadata: Metadata = { title: "Space" };
 
@@ -26,10 +26,11 @@ export default async function SpacePage({ params }: { params: Promise<{ spaceId:
   const space = allSpaces.find((s) => s.id === spaceId);
   if (!space) notFound();
 
-  const [tasks, members] = await Promise.all([
+  const [topLevel, members] = await Promise.all([
     getPendingTasks(active.id, { spaceId: space.id }),
     getHouseholdMembers(active.id),
   ]);
+  const tasks = await withSubtasks(topLevel);
 
   return (
     <div className="flex flex-col gap-8">
