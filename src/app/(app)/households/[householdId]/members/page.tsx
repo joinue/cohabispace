@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { requireUser } from "@/lib/dal";
 import { getHouseholdMembers, getMyHouseholds } from "@/features/households/queries";
 import { MembersList } from "@/features/households/components/members-list";

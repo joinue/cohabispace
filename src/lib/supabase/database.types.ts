@@ -7,6 +7,7 @@ export type Json = string | number | boolean | null | { [k: string]: Json | unde
 
 export type HouseholdRole = "owner" | "admin" | "adult" | "teen" | "child" | "guest";
 export type InvitationStatus = "pending" | "accepted" | "revoked" | "expired";
+export type TaskStatus = "pending" | "completed" | "skipped";
 
 export interface Database {
   public: {
@@ -93,6 +94,48 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["household_invitations"]["Insert"]>;
         Relationships: [];
       };
+      tasks: {
+        Row: {
+          id: string;
+          household_id: string;
+          parent_task_id: string | null;
+          series_id: string;
+          title: string;
+          notes: string | null;
+          status: TaskStatus;
+          due_at: string | null;
+          completed_at: string | null;
+          completed_by: string | null;
+          assigned_to: string | null;
+          created_by: string;
+          rrule: string | null;
+          tags: string[];
+          position: number | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          household_id: string;
+          parent_task_id?: string | null;
+          series_id?: string;
+          title: string;
+          notes?: string | null;
+          status?: TaskStatus;
+          due_at?: string | null;
+          completed_at?: string | null;
+          completed_by?: string | null;
+          assigned_to?: string | null;
+          created_by: string;
+          rrule?: string | null;
+          tags?: string[];
+          position?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["tasks"]["Insert"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -102,6 +145,7 @@ export interface Database {
     Enums: {
       household_role: HouseholdRole;
       invitation_status: InvitationStatus;
+      task_status: TaskStatus;
     };
     CompositeTypes: Record<string, never>;
   };
