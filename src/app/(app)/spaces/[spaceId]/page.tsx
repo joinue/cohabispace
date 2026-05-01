@@ -14,8 +14,15 @@ import { getPendingTasks, withSubtasks } from "@/features/tasks/queries";
 
 export const metadata: Metadata = { title: "Space" };
 
-export default async function SpacePage({ params }: { params: Promise<{ spaceId: string }> }) {
-  const { spaceId } = await params;
+export default async function SpacePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ spaceId: string }>;
+  searchParams: Promise<{ tag?: string }>;
+}) {
+  const [{ spaceId }, { tag }] = await Promise.all([params, searchParams]);
+
   const households = await getMyHouseholds();
   if (households.length === 0) notFound();
 
@@ -27,7 +34,7 @@ export default async function SpacePage({ params }: { params: Promise<{ spaceId:
   if (!space) notFound();
 
   const [topLevel, members] = await Promise.all([
-    getPendingTasks(active.id, { spaceId: space.id }),
+    getPendingTasks(active.id, { spaceId: space.id, tag: tag ?? null }),
     getHouseholdMembers(active.id),
   ]);
   const tasks = await withSubtasks(topLevel);
@@ -38,7 +45,7 @@ export default async function SpacePage({ params }: { params: Promise<{ spaceId:
         <SpaceMark space={space} size="lg" />
         <div className="flex flex-col gap-0.5">
           <p className="text-muted-foreground font-mono text-[11px] tracking-widest uppercase">
-            Space
+            {tag ? `Space · #${tag}` : "Space"}
           </p>
           <h1 className="text-3xl font-semibold tracking-tight">{space.name}</h1>
         </div>
@@ -56,7 +63,11 @@ export default async function SpacePage({ params }: { params: Promise<{ spaceId:
         members={members}
         spaces={allSpaces}
         showSpacePill={false}
-        emptyMessage={`No tasks in ${space.name} yet. Add one above.`}
+        emptyMessage={
+          tag
+            ? `No tasks in ${space.name} tagged #${tag}.`
+            : `No tasks in ${space.name} yet. Add one above.`
+        }
       />
     </div>
   );

@@ -37,7 +37,7 @@ const TASK_SELECT =
 export const getPendingTasks = cache(
   async (
     householdId: string,
-    options: { spaceId?: string | null } = {},
+    options: { spaceId?: string | null; tag?: string | null } = {},
   ): Promise<TaskWithRelations[]> => {
     await requireUser();
     const supabase = await createSupabaseServerClient();
@@ -55,12 +55,45 @@ export const getPendingTasks = cache(
       query = query.eq("space_id", options.spaceId);
     }
 
+    if (options.tag) {
+      query = query.contains("tags", [options.tag.toLowerCase()]);
+    }
+
     const { data, error } = await query
       .order("due_at", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: true });
 
     if (error) throwQueryError(error, "Loading pending tasks");
     return (data ?? []) as unknown as TaskWithRelations[];
+  },
+);
+
+/**
+ * All distinct tags actively used in the household, with usage counts.
+ * Tags from skipped tasks are excluded.
+ */
+export const getTagsWithCounts = cache(
+  async (householdId: string): Promise<Array<{ tag: string; count: number }>> => {
+    await requireUser();
+    const supabase = await createSupabaseServerClient();
+
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("tags")
+      .eq("household_id", householdId)
+      .in("status", ["pending", "completed"]);
+
+    if (error) throwQueryError(error, "Loading tags");
+
+    const counts = new Map<string, number>();
+    for (const row of data ?? []) {
+      for (const t of row.tags ?? []) {
+        counts.set(t, (counts.get(t) ?? 0) + 1);
+      }
+    }
+    return Array.from(counts.entries())
+      .map(([tag, count]) => ({ tag, count }))
+      .sort((a, b) => a.tag.localeCompare(b.tag));
   },
 );
 

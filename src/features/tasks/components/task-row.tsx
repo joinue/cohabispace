@@ -19,6 +19,7 @@ import {
   uncompleteTaskAction,
 } from "@/features/tasks/actions";
 import { EditTaskSheet } from "@/features/tasks/components/edit-task-sheet";
+import { TagPills } from "@/features/tasks/components/tag-pill";
 import { classifyDue, formatDueDate } from "@/features/tasks/utils";
 import { SpacePill } from "@/features/spaces/components/space-pill";
 import type { HouseholdMember } from "@/features/households/queries";
@@ -128,6 +129,7 @@ export function TaskRow({
               </span>
             ) : null}
           </span>
+          {task.tags && task.tags.length > 0 ? <TagPills tags={task.tags} /> : null}
           {showSpacePill && task.space ? <SpacePill space={task.space} size="xs" /> : null}
           {dueLabel ? (
             <span className={cn("shrink-0 text-xs tabular-nums", dueTone)}>{dueLabel}</span>

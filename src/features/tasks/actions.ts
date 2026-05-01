@@ -7,6 +7,7 @@ import { requireUser } from "@/lib/dal";
 import { type FormState, fieldErrorsFromZod } from "@/lib/forms";
 import { createTaskSchema, updateTaskSchema } from "@/features/tasks/schemas";
 import { nextOccurrence } from "@/features/tasks/recurrence";
+import { parseHashtags } from "@/features/tasks/tags";
 import type { Database } from "@/lib/supabase/database.types";
 
 type TaskUpdate = Database["public"]["Tables"]["tasks"]["Update"];
@@ -48,10 +49,13 @@ export async function createTaskAction(
   });
   if (!parsed.success) return { fieldErrors: fieldErrorsFromZod(parsed.error.issues) };
 
+  const { title: cleanTitle, tags } = parseHashtags(parsed.data.title);
+
   const service = createSupabaseServiceClient();
   const { error } = await service.from("tasks").insert({
     household_id: householdId,
-    title: parsed.data.title,
+    title: cleanTitle,
+    tags,
     notes: emptyToNull(parsed.data.notes),
     due_at: emptyToNull(parsed.data.dueAt),
     assigned_to: emptyToNull(parsed.data.assignedTo),
@@ -185,7 +189,11 @@ export async function updateTaskAction(
   if (!parsed.success) return { fieldErrors: fieldErrorsFromZod(parsed.error.issues) };
 
   const update: TaskUpdate = {};
-  if (parsed.data.title !== undefined) update.title = parsed.data.title;
+  if (parsed.data.title !== undefined) {
+    const { title: cleanTitle, tags } = parseHashtags(parsed.data.title);
+    update.title = cleanTitle;
+    update.tags = tags;
+  }
   if (parsed.data.notes !== undefined) update.notes = emptyToNull(parsed.data.notes);
   if (parsed.data.dueAt !== undefined) update.due_at = emptyToNull(parsed.data.dueAt);
   if (parsed.data.assignedTo !== undefined)

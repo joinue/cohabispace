@@ -16,7 +16,13 @@ import { getPendingTasks, withSubtasks } from "@/features/tasks/queries";
 
 export const metadata: Metadata = { title: "Dashboard" };
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tag?: string }>;
+}) {
+  const { tag } = await searchParams;
+
   const households = await getMyHouseholds();
   if (households.length === 0) {
     redirect("/households/new" as Route);
@@ -26,7 +32,7 @@ export default async function DashboardPage() {
   if (!active) redirect("/households/new" as Route);
 
   const [topLevel, members, spaces] = await Promise.all([
-    getPendingTasks(active.id),
+    getPendingTasks(active.id, { tag: tag ?? null }),
     getHouseholdMembers(active.id),
     getActiveSpaces(active.id),
   ]);
@@ -37,7 +43,7 @@ export default async function DashboardPage() {
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1.5">
           <p className="text-muted-foreground font-mono text-[11px] tracking-widest uppercase">
-            All tasks
+            {tag ? `Tagged #${tag}` : "All tasks"}
           </p>
           <h1 className="text-3xl font-semibold tracking-tight">{active.name}</h1>
         </div>
@@ -52,7 +58,14 @@ export default async function DashboardPage() {
 
       <QuickAddTask householdId={active.id} members={members} spaces={spaces} />
 
-      <TaskList tasks={tasks} members={members} spaces={spaces} />
+      <TaskList
+        tasks={tasks}
+        members={members}
+        spaces={spaces}
+        emptyMessage={
+          tag ? `No tasks tagged #${tag}.` : "No tasks yet. Add one above to get started."
+        }
+      />
     </div>
   );
 }
