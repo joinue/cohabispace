@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { throwQueryError } from "@/lib/supabase/errors";
 import { requireUser } from "@/lib/dal";
 import type { Database, SpaceColor, TaskStatus } from "@/lib/supabase/database.types";
 
@@ -54,7 +55,7 @@ export const getPendingTasks = cache(
       .order("due_at", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: true });
 
-    if (error) throw error;
+    if (error) throwQueryError(error, "Loading pending tasks");
     return (data ?? []) as unknown as TaskWithRelations[];
   },
 );
@@ -72,7 +73,7 @@ export const getCompletedTasks = cache(
       .order("completed_at", { ascending: false })
       .limit(limit);
 
-    if (error) throw error;
+    if (error) throwQueryError(error, "Loading completed tasks");
     return (data ?? []) as unknown as TaskWithRelations[];
   },
 );
@@ -89,7 +90,7 @@ export async function getTaskCounts(householdId: string): Promise<TaskCounts> {
     .select("status")
     .eq("household_id", householdId);
 
-  if (error) throw error;
+  if (error) throwQueryError(error, "Loading task counts");
 
   const counts: TaskCounts = {
     total: data?.length ?? 0,

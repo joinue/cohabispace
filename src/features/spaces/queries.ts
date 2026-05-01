@@ -3,6 +3,7 @@ import "server-only";
 import { cache } from "react";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { throwQueryError } from "@/lib/supabase/errors";
 import { requireUser } from "@/lib/dal";
 import type { Database } from "@/lib/supabase/database.types";
 
@@ -24,7 +25,7 @@ export const getActiveSpaces = cache(async (householdId: string): Promise<SpaceR
     .order("position", { ascending: true, nullsFirst: false })
     .order("name", { ascending: true });
 
-  if (error) throw error;
+  if (error) throwQueryError(error, "Loading spaces");
   return data ?? [];
 });
 
@@ -39,7 +40,7 @@ export const getArchivedSpaces = cache(async (householdId: string): Promise<Spac
     .not("archived_at", "is", null)
     .order("archived_at", { ascending: false });
 
-  if (error) throw error;
+  if (error) throwQueryError(error, "Loading archived spaces");
   return data ?? [];
 });
 
