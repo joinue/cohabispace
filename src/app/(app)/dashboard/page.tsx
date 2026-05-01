@@ -4,7 +4,11 @@ import { redirect } from "next/navigation";
 import { UsersIcon } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
-import { getActiveHousehold, getMyHouseholds } from "@/features/households/queries";
+import {
+  getActiveHousehold,
+  getHouseholdMembers,
+  getMyHouseholds,
+} from "@/features/households/queries";
 import { QuickAddTask } from "@/features/tasks/components/quick-add-task";
 import { TaskList } from "@/features/tasks/components/task-list";
 import { getPendingTasks } from "@/features/tasks/queries";
@@ -20,7 +24,10 @@ export default async function DashboardPage() {
   const active = await getActiveHousehold();
   if (!active) redirect("/households/new" as Route);
 
-  const tasks = await getPendingTasks(active.id);
+  const [tasks, members] = await Promise.all([
+    getPendingTasks(active.id),
+    getHouseholdMembers(active.id),
+  ]);
 
   return (
     <div className="flex flex-col gap-8">
@@ -40,9 +47,9 @@ export default async function DashboardPage() {
         </Link>
       </div>
 
-      <QuickAddTask householdId={active.id} />
+      <QuickAddTask householdId={active.id} members={members} />
 
-      <TaskList tasks={tasks} />
+      <TaskList tasks={tasks} members={members} />
     </div>
   );
 }

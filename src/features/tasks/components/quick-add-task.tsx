@@ -1,6 +1,7 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useRef, useState } from "react";
+import { requestFormReset } from "react-dom";
 import { PlusIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -8,23 +9,39 @@ import { Input } from "@/components/ui/input";
 
 import { FormFieldError } from "@/features/auth/components/form-field-error";
 import { createTaskAction } from "@/features/tasks/actions";
+import { AssigneePickerChip } from "@/features/tasks/components/assignee-picker-chip";
+import { DatePickerChip } from "@/features/tasks/components/date-picker-chip";
+import type { HouseholdMember } from "@/features/households/queries";
+import type { FormState } from "@/lib/forms";
 
-export function QuickAddTask({ householdId }: { householdId: string }) {
-  const action = createTaskAction.bind(null, householdId);
-  const [state, formAction, pending] = useActionState(action, undefined);
+export function QuickAddTask({
+  householdId,
+  members,
+}: {
+  householdId: string;
+  members: HouseholdMember[];
+}) {
   const formRef = useRef<HTMLFormElement>(null);
-  const lastResultRef = useRef<typeof state>(undefined);
+  const [date, setDate] = useState<Date | null>(null);
+  const [assignee, setAssignee] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (state === lastResultRef.current) return;
-    lastResultRef.current = state;
-    if (state && !state.error && !state.fieldErrors) {
-      formRef.current?.reset();
+  const wrappedAction = async (prev: FormState, formData: FormData): Promise<FormState> => {
+    const result = await createTaskAction(householdId, prev, formData);
+    if (result && !result.error && !result.fieldErrors) {
+      if (formRef.current) requestFormReset(formRef.current);
+      setDate(null);
+      setAssignee(null);
     }
-  }, [state]);
+    return result;
+  };
+
+  const [state, formAction, pending] = useActionState(wrappedAction, undefined);
 
   return (
-    <form ref={formRef} action={formAction} className="flex flex-col gap-1.5" noValidate>
+    <form ref={formRef} action={formAction} className="flex flex-col gap-2.5" noValidate>
+      <input type="hidden" name="dueAt" value={date ? date.toISOString() : ""} />
+      <input type="hidden" name="assignedTo" value={assignee ?? ""} />
+
       <div className="flex items-center gap-2">
         <Input
           name="title"
@@ -42,6 +59,12 @@ export function QuickAddTask({ householdId }: { householdId: string }) {
           {pending ? "Adding…" : "Add"}
         </Button>
       </div>
+
+      <div className="flex flex-wrap items-center gap-1.5">
+        <DatePickerChip value={date} onChange={setDate} />
+        <AssigneePickerChip value={assignee} onChange={setAssignee} members={members} />
+      </div>
+
       <FormFieldError messages={state?.fieldErrors?.title} />
       {state?.error ? <p className="text-destructive text-xs">{state.error}</p> : null}
     </form>

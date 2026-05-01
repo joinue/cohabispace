@@ -1,8 +1,15 @@
 import { TaskRow } from "@/features/tasks/components/task-row";
 import { DUE_GROUP_ORDER, type DueGroup, groupTasksByDue } from "@/features/tasks/utils";
+import type { HouseholdMember } from "@/features/households/queries";
 import type { TaskWithAssignee } from "@/features/tasks/queries";
 
-export function TaskList({ tasks }: { tasks: TaskWithAssignee[] }) {
+export function TaskList({
+  tasks,
+  members,
+}: {
+  tasks: TaskWithAssignee[];
+  members: HouseholdMember[];
+}) {
   const groups = groupTasksByDue(tasks);
   const visible = DUE_GROUP_ORDER.filter((g) => groups[g.key].length > 0);
 
@@ -22,6 +29,7 @@ export function TaskList({ tasks }: { tasks: TaskWithAssignee[] }) {
           groupKey={group.key}
           label={group.label}
           tasks={groups[group.key]}
+          members={members}
         />
       ))}
     </div>
@@ -32,10 +40,12 @@ function Section({
   groupKey,
   label,
   tasks,
+  members,
 }: {
   groupKey: DueGroup;
   label: string;
   tasks: TaskWithAssignee[];
+  members: HouseholdMember[];
 }) {
   return (
     <section className="flex flex-col gap-1.5">
@@ -53,7 +63,7 @@ function Section({
       </header>
       <ul className="flex flex-col">
         {tasks.map((t) => (
-          <TaskRow key={t.id} task={t} />
+          <TaskRow key={t.id} task={t} members={members} />
         ))}
       </ul>
     </section>
