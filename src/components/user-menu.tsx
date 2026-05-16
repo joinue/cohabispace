@@ -2,7 +2,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -36,12 +35,12 @@ export function UserMenu({ displayName, email }: { displayName: string | null; e
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" sideOffset={6} className="min-w-56">
-        <DropdownMenuLabel className="flex flex-col gap-0.5 px-1.5 py-1.5">
+        <div className="flex flex-col gap-0.5 px-1.5 py-1.5">
           <span className="text-foreground truncate text-sm font-medium">
             {displayName ?? email.split("@")[0]}
           </span>
           <span className="text-muted-foreground truncate text-xs">{email}</span>
-        </DropdownMenuLabel>
+        </div>
         <DropdownMenuSeparator />
         <form action={signOutAction}>
           <DropdownMenuItem

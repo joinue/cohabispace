@@ -4,10 +4,7 @@ import { cache } from "react";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/dal";
-import {
-  readActiveHouseholdId,
-  writeActiveHouseholdId,
-} from "@/features/households/active-household";
+import { readActiveHouseholdId } from "@/features/households/active-household";
 import type { Database, HouseholdRole } from "@/lib/supabase/database.types";
 
 type HouseholdRow = Database["public"]["Tables"]["households"]["Row"];
@@ -50,9 +47,13 @@ export const getMyHouseholds = cache(async (): Promise<HouseholdWithRole[]> => {
 });
 
 /**
- * Resolve the active household: read the cookie, validate the user is
- * still a member, otherwise fall back to the first household and persist
- * that as the new active.
+ * Resolve the active household: read the cookie and validate the user is
+ * still a member, otherwise fall back to the first household.
+ *
+ * Note: we deliberately do NOT persist the fallback to the cookie here.
+ * This function runs during Server Component render, and Next.js only
+ * permits cookie writes from Server Actions / Route Handlers / middleware.
+ * The cookie is written by the explicit switch/create/leave Server Actions.
  *
  * Returns `null` only if the user has zero households.
  */
@@ -64,9 +65,7 @@ export const getActiveHousehold = cache(async (): Promise<HouseholdWithRole | nu
   const fromCookie = cookieId ? households.find((h) => h.id === cookieId) : undefined;
   if (fromCookie) return fromCookie;
 
-  const fallback = households[0]!;
-  await writeActiveHouseholdId(fallback.id);
-  return fallback;
+  return households[0]!;
 });
 
 /**

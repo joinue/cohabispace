@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { startTransition, useActionState, useRef } from "react";
 import { requestFormReset } from "react-dom";
 import { PlusIcon } from "lucide-react";
 
@@ -22,7 +22,9 @@ export function SubtaskQuickAdd({
   const wrappedAction = async (prev: FormState, formData: FormData): Promise<FormState> => {
     const result = await createTaskAction(householdId, prev, formData);
     if (result && !result.error && !result.fieldErrors) {
-      if (formRef.current) requestFormReset(formRef.current);
+      startTransition(() => {
+        if (formRef.current) requestFormReset(formRef.current);
+      });
     }
     return result;
   };

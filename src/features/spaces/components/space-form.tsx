@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { startTransition, useActionState, useRef, useState } from "react";
 import { requestFormReset } from "react-dom";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -22,8 +22,10 @@ export function CreateSpaceForm({ householdId }: { householdId: string }) {
   const wrappedAction = async (prev: FormState, formData: FormData): Promise<FormState> => {
     const result = await createSpaceAction(householdId, prev, formData);
     if (result && !result.error && !result.fieldErrors) {
-      if (formRef.current) requestFormReset(formRef.current);
-      setColor("slate");
+      startTransition(() => {
+        if (formRef.current) requestFormReset(formRef.current);
+        setColor("slate");
+      });
     }
     return result;
   };

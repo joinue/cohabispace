@@ -7,6 +7,7 @@ import { CheckIcon, ChevronsUpDownIcon, PlusIcon } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -49,22 +50,24 @@ export function HouseholdSwitcher({
         <ChevronsUpDownIcon className="text-muted-foreground size-3.5" aria-hidden="true" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" sideOffset={6} className="min-w-56">
-        <DropdownMenuLabel>Households</DropdownMenuLabel>
-        {households.map((h) => (
-          <DropdownMenuItem
-            key={h.id}
-            onClick={() => select(h.id)}
-            className="flex items-center justify-between gap-3"
-          >
-            <span className="flex flex-col">
-              <span className="truncate text-sm">{h.name}</span>
-              <span className="text-muted-foreground text-xs capitalize">{h.role}</span>
-            </span>
-            {h.id === active.id ? (
-              <CheckIcon className="size-4 shrink-0" aria-hidden="true" />
-            ) : null}
-          </DropdownMenuItem>
-        ))}
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Households</DropdownMenuLabel>
+          {households.map((h) => (
+            <DropdownMenuItem
+              key={h.id}
+              onClick={() => select(h.id)}
+              className="flex items-center justify-between gap-3"
+            >
+              <span className="flex flex-col">
+                <span className="truncate text-sm">{h.name}</span>
+                <span className="text-muted-foreground text-xs capitalize">{h.role}</span>
+              </span>
+              {h.id === active.id ? (
+                <CheckIcon className="size-4 shrink-0" aria-hidden="true" />
+              ) : null}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           render={

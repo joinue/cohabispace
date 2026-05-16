@@ -25,10 +25,6 @@ async function requireMembership(userId: string, householdId: string) {
   return { ok: true as const, role: data.role };
 }
 
-function emptyToNull<T extends string | undefined>(v: T): string | null {
-  return v && v.length > 0 ? v : null;
-}
-
 export async function createTaskAction(
   householdId: string,
   _prev: FormState,
@@ -56,12 +52,12 @@ export async function createTaskAction(
     household_id: householdId,
     title: cleanTitle,
     tags,
-    notes: emptyToNull(parsed.data.notes),
-    due_at: emptyToNull(parsed.data.dueAt),
-    assigned_to: emptyToNull(parsed.data.assignedTo),
-    parent_task_id: emptyToNull(parsed.data.parentTaskId),
-    space_id: emptyToNull(parsed.data.spaceId),
-    rrule: emptyToNull(parsed.data.rrule),
+    notes: parsed.data.notes ?? null,
+    due_at: parsed.data.dueAt ?? null,
+    assigned_to: parsed.data.assignedTo ?? null,
+    parent_task_id: parsed.data.parentTaskId ?? null,
+    space_id: parsed.data.spaceId ?? null,
+    rrule: parsed.data.rrule ?? null,
     created_by: user.id,
   });
   if (error) return { error: error.message };
@@ -189,17 +185,16 @@ export async function updateTaskAction(
   if (!parsed.success) return { fieldErrors: fieldErrorsFromZod(parsed.error.issues) };
 
   const update: TaskUpdate = {};
-  if (parsed.data.title !== undefined) {
+  if (parsed.data.title !== undefined && parsed.data.title !== null) {
     const { title: cleanTitle, tags } = parseHashtags(parsed.data.title);
     update.title = cleanTitle;
     update.tags = tags;
   }
-  if (parsed.data.notes !== undefined) update.notes = emptyToNull(parsed.data.notes);
-  if (parsed.data.dueAt !== undefined) update.due_at = emptyToNull(parsed.data.dueAt);
-  if (parsed.data.assignedTo !== undefined)
-    update.assigned_to = emptyToNull(parsed.data.assignedTo);
-  if (parsed.data.spaceId !== undefined) update.space_id = emptyToNull(parsed.data.spaceId);
-  if (parsed.data.rrule !== undefined) update.rrule = emptyToNull(parsed.data.rrule);
+  if (parsed.data.notes !== undefined) update.notes = parsed.data.notes;
+  if (parsed.data.dueAt !== undefined) update.due_at = parsed.data.dueAt;
+  if (parsed.data.assignedTo !== undefined) update.assigned_to = parsed.data.assignedTo;
+  if (parsed.data.spaceId !== undefined) update.space_id = parsed.data.spaceId;
+  if (parsed.data.rrule !== undefined) update.rrule = parsed.data.rrule;
 
   if (Object.keys(update).length === 0) return {};
 
