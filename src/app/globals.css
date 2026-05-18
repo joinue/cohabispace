@@ -117,6 +117,27 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* Safe-area helpers for devices with notches / home indicators.
+   Requires `viewportFit: "cover"` on the viewport config in app/layout.tsx. */
+@utility safe-px {
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+@utility safe-px-sm {
+  padding-left: max(1.5rem, env(safe-area-inset-left));
+  padding-right: max(1.5rem, env(safe-area-inset-right));
+}
+@utility safe-px-lg {
+  padding-left: max(2rem, env(safe-area-inset-left));
+  padding-right: max(2rem, env(safe-area-inset-right));
+}
+@utility safe-pt {
+  padding-top: max(0.625rem, env(safe-area-inset-top));
+}
+@utility safe-pb {
+  padding-bottom: max(2rem, env(safe-area-inset-bottom));
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

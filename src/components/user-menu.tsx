@@ -6,9 +6,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { LogOutIcon } from "lucide-react";
+import { CheckIcon, LogOutIcon, TvIcon } from "lucide-react";
 
 import { signOutAction } from "@/features/auth/actions";
+import { setFamilyDisplayAction } from "@/features/display-mode/actions";
 
 function initials(name: string | null | undefined, email: string): string {
   const source = (name?.trim() || email).trim();
@@ -21,7 +22,17 @@ function initials(name: string | null | undefined, email: string): string {
     .toUpperCase();
 }
 
-export function UserMenu({ displayName, email }: { displayName: string | null; email: string }) {
+export function UserMenu({
+  displayName,
+  email,
+  familyDisplay,
+}: {
+  displayName: string | null;
+  email: string;
+  familyDisplay: boolean;
+}) {
+  const toggleFamilyDisplay = setFamilyDisplayAction.bind(null, !familyDisplay);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -41,6 +52,18 @@ export function UserMenu({ displayName, email }: { displayName: string | null; e
           </span>
           <span className="text-muted-foreground truncate text-xs">{email}</span>
         </div>
+        <DropdownMenuSeparator />
+        <form action={toggleFamilyDisplay}>
+          <DropdownMenuItem
+            render={
+              <button type="submit" className="w-full">
+                <TvIcon className="size-4" aria-hidden="true" />
+                <span className="flex-1 text-left">Family display</span>
+                {familyDisplay ? <CheckIcon className="size-4" aria-hidden="true" /> : null}
+              </button>
+            }
+          />
+        </form>
         <DropdownMenuSeparator />
         <form action={signOutAction}>
           <DropdownMenuItem

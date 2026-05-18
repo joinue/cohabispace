@@ -8,7 +8,7 @@ export type Json = string | number | boolean | null | { [k: string]: Json | unde
 export type HouseholdRole = "owner" | "admin" | "adult" | "teen" | "child" | "guest";
 export type InvitationStatus = "pending" | "accepted" | "revoked" | "expired";
 export type TaskStatus = "pending" | "completed" | "skipped";
-export type SpaceColor =
+export type SpacePresetColor =
   | "slate"
   | "red"
   | "orange"
@@ -17,6 +17,14 @@ export type SpaceColor =
   | "blue"
   | "violet"
   | "rose";
+
+/**
+ * What's actually stored in `spaces.color`. Either a preset token (above) or
+ * a user-chosen hex like `"#4a90e2"`. The `(string & {})` trick keeps preset
+ * autocomplete while still accepting any string at the type level — the
+ * runtime distinction is done by helpers in `features/spaces/colors.ts`.
+ */
+export type SpaceColor = SpacePresetColor | (string & {});
 
 export interface Database {
   public: {

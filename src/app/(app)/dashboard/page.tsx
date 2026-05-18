@@ -1,15 +1,18 @@
 import type { Metadata, Route } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { format } from "date-fns";
 import { UsersIcon } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { readFamilyDisplay } from "@/features/display-mode/cookie";
 import {
   getActiveHousehold,
   getHouseholdMembers,
   getMyHouseholds,
 } from "@/features/households/queries";
 import { getActiveSpaces } from "@/features/spaces/queries";
+import { FamilyTaskList } from "@/features/tasks/components/family-task-list";
 import { QuickAddTask } from "@/features/tasks/components/quick-add-task";
 import { TaskList } from "@/features/tasks/components/task-list";
 import { getPendingTasks, withSubtasks } from "@/features/tasks/queries";
@@ -31,12 +34,33 @@ export default async function DashboardPage({
   const active = await getActiveHousehold();
   if (!active) redirect("/households/new" as Route);
 
-  const [topLevel, members, spaces] = await Promise.all([
+  const [topLevel, members, spaces, familyDisplay] = await Promise.all([
     getPendingTasks(active.id, { tag: tag ?? null }),
     getHouseholdMembers(active.id),
     getActiveSpaces(active.id),
+    readFamilyDisplay(),
   ]);
   const tasks = await withSubtasks(topLevel);
+
+  if (familyDisplay) {
+    const now = new Date();
+    return (
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-1">
+          <p className="text-muted-foreground text-base font-medium tracking-wide uppercase">
+            {format(now, "EEEE")}
+          </p>
+          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+            {format(now, "MMMM d")}
+          </h1>
+        </div>
+
+        <QuickAddTask householdId={active.id} members={members} spaces={spaces} />
+
+        <FamilyTaskList tasks={tasks} />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8">

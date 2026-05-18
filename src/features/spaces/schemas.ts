@@ -1,8 +1,14 @@
 import { z } from "zod";
 
-import { SPACE_COLOR_ORDER } from "@/features/spaces/colors";
+import { HEX_COLOR_REGEX, SPACE_COLOR_ORDER } from "@/features/spaces/colors";
 
-export const spaceColorSchema = z.enum(SPACE_COLOR_ORDER);
+export const spaceColorSchema = z.union([
+  z.enum(SPACE_COLOR_ORDER),
+  z
+    .string()
+    .regex(HEX_COLOR_REGEX, "Use a 6-digit hex like #4a90e2")
+    .transform((s) => s.toLowerCase()),
+]);
 
 const nameSchema = z
   .string()

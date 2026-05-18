@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { SPACE_COLOR_TOKENS } from "@/features/spaces/colors";
+import { getSpaceColorRender } from "@/features/spaces/colors";
 import type { SpaceColor } from "@/lib/supabase/database.types";
 
 const SIZE: Record<NonNullable<SpaceMarkProps["size"]>, string> = {
@@ -13,25 +13,48 @@ interface SpaceMarkProps {
   space: { name: string; color: SpaceColor };
   size?: "xs" | "sm" | "md" | "lg";
   className?: string;
+  /** Drop the tinted background; foreground stays. Used inside SpacePill. */
+  transparent?: boolean;
 }
 
 /**
  * Colored letter tile representing a space. The first alphanumeric
  * character of the name is the letter; tinted background and foreground
- * come from the space's color token. No emojis — this is intentional.
+ * come from the space's color — either a preset token or a user-chosen
+ * hex routed through `color-mix()`.
  */
-export function SpaceMark({ space, size = "sm", className }: SpaceMarkProps) {
-  const tokens = SPACE_COLOR_TOKENS[space.color];
+export function SpaceMark({ space, size = "sm", className, transparent }: SpaceMarkProps) {
+  const render = getSpaceColorRender(space.color);
   const letter = (space.name.match(/[\p{L}\p{N}]/u)?.[0] ?? "•").toUpperCase();
+
+  if (render.kind === "preset") {
+    return (
+      <span
+        className={cn(
+          "grid shrink-0 place-items-center font-semibold tracking-tight",
+          SIZE[size],
+          !transparent && render.tokens.bg,
+          render.tokens.fg,
+          className,
+        )}
+        aria-hidden="true"
+      >
+        {letter}
+      </span>
+    );
+  }
+
   return (
     <span
       className={cn(
         "grid shrink-0 place-items-center font-semibold tracking-tight",
         SIZE[size],
-        tokens.bg,
-        tokens.fg,
         className,
       )}
+      style={{
+        ...(transparent ? {} : render.styles.bgStyle),
+        ...render.styles.fgStyle,
+      }}
       aria-hidden="true"
     >
       {letter}

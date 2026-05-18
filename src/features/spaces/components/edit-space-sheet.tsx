@@ -15,11 +15,9 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
-
 import { FormFieldError } from "@/features/auth/components/form-field-error";
 import { updateSpaceAction } from "@/features/spaces/actions";
-import { SPACE_COLOR_LABEL, SPACE_COLOR_ORDER, SPACE_COLOR_TOKENS } from "@/features/spaces/colors";
+import { SpaceColorPicker } from "@/features/spaces/components/space-color-picker";
 import type { SpaceColor } from "@/lib/supabase/database.types";
 import type { FormState } from "@/lib/forms";
 import type { SpaceRow } from "@/features/spaces/queries";
@@ -98,28 +96,8 @@ function EditSpaceFormBody({ space, onClose }: { space: SpaceRow; onClose: () =>
 
         <div className="flex flex-col gap-2">
           <Label className="text-xs">Color</Label>
-          <div className="flex flex-wrap items-center gap-1.5">
-            {SPACE_COLOR_ORDER.map((c) => {
-              const tokens = SPACE_COLOR_TOKENS[c];
-              const selected = c === color;
-              return (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setColor(c)}
-                  aria-label={SPACE_COLOR_LABEL[c]}
-                  aria-pressed={selected}
-                  className={cn(
-                    "size-7 rounded-full transition-shadow outline-none",
-                    tokens.dot,
-                    selected
-                      ? "ring-foreground ring-offset-background ring-2 ring-offset-2"
-                      : "ring-foreground/10 hover:ring-foreground/30 ring-1",
-                  )}
-                />
-              );
-            })}
-          </div>
+          <SpaceColorPicker value={color} onChange={setColor} swatchSize={7} />
+          <FormFieldError messages={state?.fieldErrors?.color} />
         </div>
       </form>
 

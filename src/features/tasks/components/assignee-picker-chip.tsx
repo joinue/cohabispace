@@ -45,7 +45,7 @@ export function AssigneePickerChip({
       <PopoverTrigger
         aria-label={ariaLabel}
         className={cn(
-          "border-input bg-background hover:bg-muted inline-flex h-8 items-center gap-1.5 rounded-full border px-2 text-xs font-medium transition-colors outline-none",
+          "border-input bg-background hover:bg-muted inline-flex h-8 items-center gap-1.5 rounded-full border px-2 text-xs font-medium transition-colors outline-none pointer-coarse:h-10 pointer-coarse:text-sm",
           "focus-visible:ring-ring/50 focus-visible:ring-2",
           selected ? "text-foreground" : "text-muted-foreground",
         )}

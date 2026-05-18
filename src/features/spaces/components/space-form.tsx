@@ -7,11 +7,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
 
 import { FormFieldError } from "@/features/auth/components/form-field-error";
 import { createSpaceAction } from "@/features/spaces/actions";
-import { SPACE_COLOR_LABEL, SPACE_COLOR_ORDER, SPACE_COLOR_TOKENS } from "@/features/spaces/colors";
+import { SpaceColorPicker } from "@/features/spaces/components/space-color-picker";
 import type { SpaceColor } from "@/lib/supabase/database.types";
 import type { FormState } from "@/lib/forms";
 
@@ -63,30 +62,12 @@ export function CreateSpaceForm({ householdId }: { householdId: string }) {
         </Button>
       </div>
 
+      <FormFieldError messages={state?.fieldErrors?.color} />
       <FormFieldError messages={state?.fieldErrors?.name} />
 
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-muted-foreground mr-1 text-xs">Color</span>
-        {SPACE_COLOR_ORDER.map((c) => {
-          const tokens = SPACE_COLOR_TOKENS[c];
-          const selected = c === color;
-          return (
-            <button
-              key={c}
-              type="button"
-              onClick={() => setColor(c)}
-              aria-label={SPACE_COLOR_LABEL[c]}
-              aria-pressed={selected}
-              className={cn(
-                "size-6 rounded-full transition-shadow outline-none",
-                tokens.dot,
-                selected
-                  ? "ring-foreground ring-offset-background ring-2 ring-offset-2"
-                  : "ring-foreground/10 hover:ring-foreground/30 ring-1",
-              )}
-            />
-          );
-        })}
+      <div className="flex flex-col gap-1.5">
+        <span className="text-muted-foreground text-xs">Color</span>
+        <SpaceColorPicker value={color} onChange={setColor} />
       </div>
     </form>
   );

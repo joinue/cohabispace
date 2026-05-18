@@ -149,7 +149,7 @@ export function TaskRow({
         <DropdownMenu>
           <DropdownMenuTrigger
             aria-label={`Actions for ${task.title}`}
-            className="hover:bg-muted text-muted-foreground hover:text-foreground rounded-md p-1 opacity-0 transition-opacity outline-none group-hover/task:opacity-100 focus-visible:opacity-100 data-[popup-open]:opacity-100"
+            className="hover:bg-muted text-muted-foreground hover:text-foreground rounded-md p-1 opacity-0 transition-opacity outline-none group-hover/task:opacity-100 focus-visible:opacity-100 data-[popup-open]:opacity-100 pointer-coarse:p-2 pointer-coarse:opacity-100"
           >
             <MoreHorizontalIcon className="size-4" aria-hidden="true" />
           </DropdownMenuTrigger>

@@ -1,4 +1,6 @@
-import type { SpaceColor } from "@/lib/supabase/database.types";
+import type { CSSProperties } from "react";
+
+import type { SpaceColor, SpacePresetColor } from "@/lib/supabase/database.types";
 
 /**
  * Curated palette of space colors. Picked for legibility against both
@@ -29,9 +31,9 @@ export const SPACE_COLOR_ORDER = [
   "blue",
   "violet",
   "rose",
-] as const satisfies readonly SpaceColor[];
+] as const satisfies readonly SpacePresetColor[];
 
-export const SPACE_COLOR_TOKENS: Record<SpaceColor, SpaceColorTokens> = {
+export const SPACE_COLOR_TOKENS: Record<SpacePresetColor, SpaceColorTokens> = {
   slate: {
     bg: "bg-slate-500/12 dark:bg-slate-400/15",
     fg: "text-slate-700 dark:text-slate-200",
@@ -82,7 +84,7 @@ export const SPACE_COLOR_TOKENS: Record<SpaceColor, SpaceColorTokens> = {
   },
 };
 
-export const SPACE_COLOR_LABEL: Record<SpaceColor, string> = {
+export const SPACE_COLOR_LABEL: Record<SpacePresetColor, string> = {
   slate: "Slate",
   red: "Red",
   orange: "Orange",
@@ -92,3 +94,69 @@ export const SPACE_COLOR_LABEL: Record<SpaceColor, string> = {
   violet: "Violet",
   rose: "Rose",
 };
+
+export const DEFAULT_CUSTOM_HEX = "#6366f1";
+
+export const HEX_COLOR_REGEX = /^#[0-9a-fA-F]{6}$/;
+
+export function isHexColor(value: string): boolean {
+  return HEX_COLOR_REGEX.test(value);
+}
+
+export function isPresetColor(value: string): value is SpacePresetColor {
+  return (SPACE_COLOR_ORDER as readonly string[]).includes(value);
+}
+
+export function normalizeHex(value: string): string {
+  return value.toLowerCase();
+}
+
+/**
+ * Inline style props for a custom hex color. The mixes target both light and
+ * dark themes via `var(--foreground)`, which next-themes flips with the
+ * `.dark` class — the foreground swing is enough to keep text readable on
+ * either surface without needing a separate light/dark stylesheet.
+ */
+export interface HexColorStyles {
+  bgStyle: CSSProperties;
+  fgStyle: CSSProperties;
+  dotStyle: CSSProperties;
+  ringStyle: CSSProperties;
+}
+
+export function hexColorStyles(hex: string): HexColorStyles {
+  const normalized = normalizeHex(hex);
+  return {
+    bgStyle: {
+      backgroundColor: `color-mix(in oklab, ${normalized} 14%, transparent)`,
+    },
+    fgStyle: {
+      color: `color-mix(in oklab, ${normalized} 82%, var(--foreground) 18%)`,
+    },
+    dotStyle: {
+      backgroundColor: normalized,
+    },
+    ringStyle: {
+      // boxShadow as a ring substitute so we can use color-mix output
+      boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${normalized} 35%, transparent)`,
+    },
+  };
+}
+
+export type SpaceColorRender =
+  | { kind: "preset"; tokens: SpaceColorTokens }
+  | { kind: "hex"; styles: HexColorStyles };
+
+/**
+ * Dispatch helper for components that render with a space color. Always
+ * returns something renderable — unknown strings fall back to `slate`.
+ */
+export function getSpaceColorRender(color: SpaceColor): SpaceColorRender {
+  if (isPresetColor(color)) {
+    return { kind: "preset", tokens: SPACE_COLOR_TOKENS[color] };
+  }
+  if (isHexColor(color)) {
+    return { kind: "hex", styles: hexColorStyles(color) };
+  }
+  return { kind: "preset", tokens: SPACE_COLOR_TOKENS.slate };
+}

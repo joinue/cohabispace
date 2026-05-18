@@ -17,6 +17,17 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       <main className="flex flex-1 items-center justify-center px-6 pb-16 sm:px-8">
         <div className="w-full max-w-sm">{children}</div>
       </main>
+      <footer className="text-muted-foreground flex flex-wrap items-center justify-center gap-4 px-6 pb-6 font-mono text-[11px] tracking-wide sm:px-8">
+        <Link href="/terms" className="hover:text-foreground">
+          Terms
+        </Link>
+        <Link href="/privacy" className="hover:text-foreground">
+          Privacy
+        </Link>
+        <a href="mailto:marc@joinue.com" className="hover:text-foreground">
+          Contact
+        </a>
+      </footer>
     </div>
   );
 }

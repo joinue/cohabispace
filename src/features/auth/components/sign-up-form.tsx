@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -67,6 +68,18 @@ export function SignUpForm() {
       <Button type="submit" size="lg" disabled={pending} className="w-full">
         {pending ? "Creating account…" : "Create account"}
       </Button>
+
+      <p className="text-muted-foreground text-center text-xs leading-relaxed">
+        By creating an account, you agree to our{" "}
+        <Link href="/terms" className="text-foreground underline-offset-4 hover:underline">
+          Terms of Service
+        </Link>{" "}
+        and{" "}
+        <Link href="/privacy" className="text-foreground underline-offset-4 hover:underline">
+          Privacy Policy
+        </Link>
+        .
+      </p>
     </form>
   );
 }
